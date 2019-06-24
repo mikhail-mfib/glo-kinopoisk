@@ -5,12 +5,13 @@ function apiSearch(evt) {
     evt.preventDefault();
     const searchText = document.querySelector('#search-text').value;
     const server = 'https://api.themoviedb.org/3/search/multi?api_key=7e7bfe7b37b3f3198e3dcb737f5ead6d&language=ru&query=' + searchText;
+    movie.innerHTML = 'Загрузка';
     
-    
-    requestApi(server).then(function(result) {
-            const output = JSON.parse(result);
-            let inner = '';
-            output.results.forEach(function (item){
+    requestApi(server)
+    .then(function(result) {
+        const output = JSON.parse(result);
+        let inner = '';
+        output.results.forEach(function (item){
             let nameItem = item.name || item.title;
             let dateItem = '';
             if (item.first_air_date || item.release_date) {
@@ -19,14 +20,13 @@ function apiSearch(evt) {
 
             inner += `<div class="col-6"><h4>${nameItem}</h4><h6>${dateItem}</h6></div>`;       
         });
-
         movie.innerHTML = inner;
 
-        })
-        .catch(function(reason){
-            movie.innerHTML = 'Упс, что-то пошло не так';
-            console.log('error ' + request.status);
-        });
+    })
+    .catch(function(reason){
+        movie.innerHTML = 'Упс, что-то пошло не так';
+        console.log('error ' + request.status);
+    });
 }
 
 searchForm.addEventListener('submit', apiSearch);
@@ -36,11 +36,10 @@ function requestApi(url) {
         const request = new XMLHttpRequest();
         request.open('GET', url);
         request.addEventListener('load', function() {
-            if (reject.status !== 200) {
+            if (request.status !== 200) {
                 reject({status: request.status});
                 return;
             } 
-
             resolve(request.response);
         });
         request.addEventListener('error', function() {
@@ -49,20 +48,4 @@ function requestApi(url) {
         request.send();
     })
     
-    
-    request.addEventListener('readystatechange', () => {
-        if (request.readyState !== 4) {
-            movie.innerHTML = 'Загрузка';
-            return
-        };
-
-        if (request.status !== 200) {
-            movie.innerHTML = 'Упс, что-то пошло не так';
-            console.log('error ' + request.status);
-            return;
-        }
-
-        const output = JSON.parse(request.responseText);
-        
-    });
 }
